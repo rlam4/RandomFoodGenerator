@@ -21,7 +21,8 @@
         android:id="@+id/button"
         android:text="Find Me Food!"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="buttonStartLocationUpdate"/>
 
     <Button
         android:layout_width="wrap_content"
