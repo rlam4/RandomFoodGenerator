@@ -1,5 +1,8 @@
 package com.ram.randomfoodgenerator;
 
+import android.os.AsyncTask;
+import android.util.Log;
+
 import com.yelp.clientlib.connection.YelpAPI;
 import com.yelp.clientlib.connection.YelpAPIFactory;
 import com.yelp.clientlib.entities.Business;
@@ -16,13 +19,14 @@ import retrofit2.Call;
 /**
  * Created by Abbott on 9/15/2016.
  */
-public class YelpHelper {
+public class YelpHelper extends AsyncTask<Double, Void, ArrayList<Business>> {
 
     private static final String CONSUMER_KEY = "NVaDEK37pXM5ZGRfnN3NRg";
     private static final String CONSUMER_SECRET = "RgH-3tzg5URWf-hK8G3NA8anG-s";
     private static final String TOKEN = "V2CM0wuGT55RQ-QNzRzpLsKNZElNMThW";
     private static final String TOKEN_SECRET = "ddiuTnligH82cESsnS_TNi6xHh8";
 
+    /*
     protected static ArrayList<Business> getBusinesses(double latitude, double longitude) {
         YelpAPIFactory apiFactory = new YelpAPIFactory(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
         YelpAPI yelpAPI = apiFactory.createAPI();
@@ -73,5 +77,40 @@ public class YelpHelper {
         }
 
         return null;
+    }
+    */
+    @Override
+    protected ArrayList<Business> doInBackground(Double... latLong) {
+        YelpAPIFactory apiFactory = new YelpAPIFactory(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
+        YelpAPI yelpAPI = apiFactory.createAPI();
+
+        Map<String, String> params = new HashMap<>();
+
+        // general params
+        params.put("term", "food");
+        params.put("limit", "20");
+        params.put("sort", "1"); // by distance
+
+        // coordinates
+        CoordinateOptions coordinate = CoordinateOptions.builder()
+                .latitude(latLong[0])
+                .longitude(latLong[1]).build();
+        Call<SearchResponse> call = yelpAPI.search(coordinate, params);
+
+        try {
+            SearchResponse searchResponse = call.execute().body();
+
+            return searchResponse.businesses();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(ArrayList<Business> result) {
+        Business firstRestaurant = result.get(0);
+        Log.i(MainActivity.TAG, "Retrieved restaurant: " + firstRestaurant.name() + " " + firstRestaurant.location().address() + " " + firstRestaurant.displayPhone());
     }
 }
