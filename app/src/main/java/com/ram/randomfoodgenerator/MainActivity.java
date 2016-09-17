@@ -1,7 +1,10 @@
 package com.ram.randomfoodgenerator;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,8 +18,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.yelp.clientlib.entities.Business;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -68,11 +73,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             startLocationUpdate();
         }
         Log.i(TAG, "Checking Location accuracy");
-        while(mCurrentLocation == null || mCurrentLocation.getAccuracy() > 1000.0) {
+        while (mCurrentLocation == null || mCurrentLocation.getAccuracy() > 1000.0) {
             Log.i(TAG, "Waiting for accuracy to reach 100 m");
             try {
                 Thread.sleep(FASTEST_UPDATE_INTERVAL / 2);
-                if(mCurrentLocation == null) {
+                if (mCurrentLocation == null) {
                     Log.i(TAG, "Location Null");
                 } else {
                     Log.i(TAG, "Accuracy = " + mCurrentLocation.getAccuracy());
@@ -86,7 +91,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.i(TAG, "Passed accuracy test");
         stopLocationUpdate();
         Log.i(TAG, "Writing location to screen");
-        Toast.makeText(this, "Latitude: " + mCurrentLocation.getLatitude() + " Longitude: " + mCurrentLocation.getLongitude(), Toast.LENGTH_LONG).show();
+        Log.i(TAG, "Latitude: " + mCurrentLocation.getLatitude() + " Longitude: " + mCurrentLocation.getLongitude());
+
+        //Checks to make sure there is an internet connection and then does Yelp API asynchronously
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            new YelpHelper().execute(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        } else {
+            Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 
     protected void locationRequestDenied() {
@@ -105,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     protected void stopLocationUpdate() {
-        if(mRequestingLocationUpdates) {
+        if (mRequestingLocationUpdates) {
             Log.i(TAG, "Stopping Location Updates");
             mRequestingLocationUpdates = false;
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -131,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onPause() {
         super.onPause();
-        if(mGoogleApiClient.isConnected()) {
+        if (mGoogleApiClient.isConnected()) {
             stopLocationUpdate();
         }
     }
@@ -144,7 +161,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(Bundle bundle) {
-        startLocationUpdate();
+        if(mCurrentLocation == null) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.i(TAG, "Requesting GPS permissions");
+                ActivityCompat.requestPermissions(this,
+                        new String[]{"android.permission.ACCESS_FINE_LOCATION"},
+                        PERMISSION_REQUEST_FINE_LOCATION);
+            }
+            mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        }
+
+        if(mRequestingLocationUpdates) {
+            startLocationUpdate();
+        }
     }
 
     @Override

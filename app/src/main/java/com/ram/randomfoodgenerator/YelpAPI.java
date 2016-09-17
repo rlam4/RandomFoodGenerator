@@ -1,5 +1,7 @@
 package com.ram.randomfoodgenerator;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 import org.json.simple.JSONArray;
@@ -7,6 +9,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.scribe.builder.ServiceBuilder;
+import org.scribe.exceptions.OAuthConnectionException;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
@@ -43,6 +46,7 @@ public class YelpAPI {
     }
 
     private String searchForBusinessesByLocation(Double latitude, Double longitude) {
+        Log.i(MainActivity.TAG, "Creating OAuth request");
         OAuthRequest request = createOAuthRequest(SEARCH_PATH);
         request.addQuerystringParameter("term", "food");
         request.addQuerystringParameter("limit", "20");
@@ -69,8 +73,11 @@ public class YelpAPI {
      * @return <tt>String</tt> body of API response
      */
     private String sendRequestAndGetResponse(OAuthRequest request) {
+        Log.i(MainActivity.TAG, "Signing request");
         this.service.signRequest(this.accessToken, request);
+        Log.i(MainActivity.TAG, "Querying: " + request.getCompleteUrl());
         Response response = request.send();
+        Log.i(MainActivity.TAG, "Returning result");
         return response.getBody();
     }
 
@@ -83,6 +90,7 @@ public class YelpAPI {
     }
 
     static ArrayList<Restaurant> parseJSON(String searchResponseJSON) {
+        Log.i(MainActivity.TAG, "Parsing JSON result");
         ArrayList<Restaurant> parsedRestaurants = new ArrayList<>();
 
         JSONParser parser = new JSONParser();
@@ -102,6 +110,52 @@ public class YelpAPI {
         for(int i = 0; i < businesses.size() - 1; i++) {
             JSONObject business = (JSONObject) businesses.get(i);
 
+            String name, address, url, image_url, display_phone, rating_img_url, mobile_url, city, postal_code, state_code;
+            Double rating, latitude, longitude;
+            name = address = url = image_url = display_phone = rating_img_url = mobile_url = city = postal_code = state_code = "";
+            rating = latitude = longitude = 0.0;
+            if(business.get("name") != null) {
+                name = business.get("name").toString();
+            }
+            if(business.get("location") != null && ((JSONObject)business.get("location")).get("address") != null) {
+                address = ((JSONObject)business.get("location")).get("address").toString();
+            }
+            if(business.get("url") != null) {
+                url = business.get("url").toString();
+            }
+            if(business.get("image_url") != null) {
+                image_url = business.get("image_url").toString();
+            }
+            if(business.get("display_phone") != null) {
+                display_phone = business.get("display_phone").toString();
+            }
+            if(business.get("rating_img_url") != null) {
+                rating_img_url = business.get("rating_img_url").toString();
+            }
+            if(business.get("mobile_url") != null) {
+                mobile_url = business.get("mobile_url").toString();
+            }
+            if(business.get("city") != null) {
+                city = business.get("city").toString();
+            }
+            if(business.get("postal_code") != null) {
+                postal_code = business.get("postal_code").toString();
+            }
+            if(business.get("state_code") != null) {
+                state_code = business.get("state_code").toString();
+            }
+            if(business.get("rating") != null) {
+                rating = (Double) business.get("rating");
+            }
+            if(business.get("location") != null && ((JSONObject)business.get("location")).get("coordinate") != null) {
+                latitude = (Double)(((JSONObject)((JSONObject)business.get("location")).get("coordinate")).get("latitude"));
+            }
+            if(business.get("location") != null && ((JSONObject)business.get("location")).get("coordinate") != null) {
+                longitude = (Double)(((JSONObject)((JSONObject)business.get("location")).get("coordinate")).get("longitude"));
+            }
+
+            parsedRestaurants.add(new Restaurant(name, address, url, image_url, display_phone, rating_img_url, mobile_url, city, postal_code, state_code, rating, latitude, longitude));
+            /*
             parsedRestaurants.add(new Restaurant(business.get("name").toString(),
                     ((JSONObject) business.get("location")).get("address").toString(),
                     business.get("url").toString(), business.get("image_url").toString(),
@@ -110,6 +164,7 @@ public class YelpAPI {
                     business.get("postal_code").toString(), business.get("state_code").toString(),
                     (Double) business.get("rating"), (Double) ((JSONObject)((JSONObject) business.get("location")).get("coordinate")).get("latitude"),
                     (Double) ((JSONObject)((JSONObject) business.get("location")).get("coordinate")).get("longitude")));
+            */
         }
 
         return parsedRestaurants;
