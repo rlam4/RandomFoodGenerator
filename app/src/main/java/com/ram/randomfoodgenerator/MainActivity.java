@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     protected void locationRequestDenied() {
-        //TODO: If location access was denied then use zip code instead
+        //TODO: If location access was denied then ask user to input a zip code and use the YelpHelperZipCode class instead
     }
 
     protected void startLocationUpdate() {
