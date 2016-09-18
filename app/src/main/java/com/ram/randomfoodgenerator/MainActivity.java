@@ -29,8 +29,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static final long FASTEST_UPDATE_INTERVAL = UPDATE_INTERVAL / 2;
     protected static int PERMISSION_REQUEST_FINE_LOCATION = 1;
 
-    protected Button mStartButton;
-
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
     protected Location mCurrentLocation;
@@ -42,8 +40,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mStartButton = (Button) findViewById(R.id.button);
 
         buildGoogleApiClient();
     }
