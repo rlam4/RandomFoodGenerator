@@ -20,16 +20,16 @@
         android:layout_height="wrap_content"
         android:id="@+id/button"
         android:text="Find Me Food!"
+        android:onClick="buttonStartLocationUpdate"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="buttonStartLocationUpdate"/>
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings"
-        android:id="@+id/button2"
+        android:text="Give me something else"
+        android:id="@+id/button3"
         android:layout_alignParentBottom="true"
-        android:layout_alignEnd="@+id/textView" />
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

@@ -1,5 +1,7 @@
 package com.ram.randomfoodgenerator;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import com.ram.randomfoodgenerator.MainActivity;
 
 import retrofit2.Call;
 
@@ -60,6 +63,7 @@ public class YelpHelper extends AsyncTask<Double, Void, ArrayList<Business>> {
     protected void onPostExecute(ArrayList<Business> result) {
         Business firstRestaurant = shuffle(result).get(0);
         Log.i(MainActivity.TAG, "Retrieved restaurant: " + firstRestaurant.name() + " " + firstRestaurant.location().address() + " " + firstRestaurant.displayPhone());
+        MainActivity.restaurantList = result;
     }
 
     private ArrayList<Business> shuffle(ArrayList<Business> places) {

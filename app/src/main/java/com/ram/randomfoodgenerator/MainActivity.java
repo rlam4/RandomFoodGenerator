@@ -1,6 +1,7 @@
 package com.ram.randomfoodgenerator;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -11,6 +12,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -18,8 +21,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.yelp.clientlib.entities.Business;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -36,12 +41,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected Boolean mRequestingLocationUpdates = false;
     protected String mLastUpdateTime;
 
+    //Change variables names to mButtonX later
+    public Button b1;
+    public Button b2;
+
+    public static ArrayList<Business> restaurantList;
+    public TextView textView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         buildGoogleApiClient();
+
+        //Button generation, initial button delcared else where
+        b2 = (Button)findViewById(R.id.button3);
+        b2.setVisibility(View.GONE);
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //pop off list
+                restaurantList.remove(0);
+                textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone());
+            }
+        });
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -93,6 +118,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         } else {
             Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
         }
+
+        //This button is rather out of place
+        b1 = (Button)findViewById(R.id.button);
+       textView = (TextView)findViewById(R.id.textView);
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //change activity to yelp helper
+                b1.setVisibility(View.INVISIBLE);
+                b2.setVisibility(View.VISIBLE);
+                textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+
+                        "\nPhone Number: " + restaurantList.get(0).displayPhone() + "\nRating: " + restaurantList.get(0).rating());
+            }
+        });
     }
 
     protected void locationRequestDenied() {
@@ -190,9 +229,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
             else {
                 Log.i(TAG, "GPS Permission Denied");
-                locationRequestDenied();
             }
         }
         Log.i(TAG, "Returning from another onRequestPermissionsResult");
+    }
+
+    public void setRestaurantList(ArrayList<Business> list){
+        this.restaurantList = list;
     }
 }
