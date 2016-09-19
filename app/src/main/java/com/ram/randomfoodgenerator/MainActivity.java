@@ -3,6 +3,8 @@ package com.ram.randomfoodgenerator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +26,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.yelp.clientlib.entities.Business;
 
+import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //Change variables names to mButtonX later
     public Button b1;
     public Button b2;
+    public ImageView img;
 
     public static ArrayList<Business> restaurantList;
     public TextView textView;
@@ -56,6 +61,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         buildGoogleApiClient();
 
+        img = (ImageView)findViewById(R.id.img);
+        img.setVisibility(View.GONE);
+
         //Button generation, initial button delcared else where
         b2 = (Button)findViewById(R.id.button3);
         b2.setVisibility(View.GONE);
@@ -66,9 +74,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if(restaurantList != null && restaurantList.get(0) != null) {
                     restaurantList.remove(0);
                     textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone()  + "\nRating: " + restaurantList.get(0).rating());
+                    new DownloadImageHelper(img).execute(restaurantList.get(0).imageUrl());
                 }
             }
         });
+
+
 
     }
 
@@ -131,6 +142,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         b2.setVisibility(View.VISIBLE);
         if(restaurantList != null && restaurantList.get(0) != null) {
             textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone()  + "\nRating: " + restaurantList.get(0).rating());
+            img.setVisibility(View.VISIBLE);
+            new DownloadImageHelper(img).execute(restaurantList.get(0).imageUrl());
         } else {
             Toast.makeText(this, "Retrieving Yelp information...", Toast.LENGTH_SHORT).show();
         }
