@@ -24,6 +24,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.google.android.gms:play-services:9.4.0'
-    compile files('lib/retrofit-2.1.0.jar')
-    compile files('lib/yelp-android-2.0.0.jar')
+    compile 'com.yelp.clientlib:yelp-android:2.0.0'
+    compile 'se.akerfeldt:okhttp-signpost:1.1.0'
+    compile 'com.squareup.okhttp3:okhttp:3.0.0-RC1'
+    compile 'oauth.signpost:signpost-core:1.2.1.2'
 }
