@@ -30,6 +30,12 @@ public class YelpHelper extends AsyncTask<Double, Void, ArrayList<Business>> {
     private static final String TOKEN = "V2CM0wuGT55RQ-QNzRzpLsKNZElNMThW";
     private static final String TOKEN_SECRET = "ddiuTnligH82cESsnS_TNi6xHh8";
 
+    private MainActivity mainActivity;
+
+    public YelpHelper(MainActivity mainAct) {
+        mainActivity = mainAct;
+    }
+
     @Override
     protected ArrayList<Business> doInBackground(Double... latLong) {
         YelpAPIFactory apiFactory = new YelpAPIFactory(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
@@ -64,6 +70,7 @@ public class YelpHelper extends AsyncTask<Double, Void, ArrayList<Business>> {
         Business firstRestaurant = shuffle(result).get(0);
         Log.i(MainActivity.TAG, "Retrieved restaurant: " + firstRestaurant.name() + " " + firstRestaurant.location().address() + " " + firstRestaurant.displayPhone());
         MainActivity.restaurantList = result;
+        mainActivity.displayLocation();
     }
 
     private ArrayList<Business> shuffle(ArrayList<Business> places) {

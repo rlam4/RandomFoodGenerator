@@ -63,10 +63,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View v) {
                 //pop off list
-                restaurantList.remove(0);
-                textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone());
+                if(restaurantList != null && restaurantList.get(0) != null) {
+                    restaurantList.remove(0);
+                    textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone()  + "\nRating: " + restaurantList.get(0).rating());
+                }
             }
         });
+
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -86,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     protected void buttonStartLocationUpdate(View v) {
-        Log.i(TAG, "Button Pressed");
         if (!mRequestingLocationUpdates) {
             mRequestingLocationUpdates = true;
             startLocationUpdate();
@@ -114,24 +116,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if(networkInfo != null && networkInfo.isConnected()) {
-            new YelpHelper().execute(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+            Toast.makeText(this, "Retrieving Yelp information...", Toast.LENGTH_SHORT).show();
+            new YelpHelper(this).execute(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         } else {
             Toast.makeText(this, "No network connection available", Toast.LENGTH_SHORT).show();
         }
+    }
 
-        //This button is rather out of place
+
+    public void displayLocation() {
         b1 = (Button)findViewById(R.id.button);
-       textView = (TextView)findViewById(R.id.textView);
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //change activity to yelp helper
-                b1.setVisibility(View.INVISIBLE);
-                b2.setVisibility(View.VISIBLE);
-                textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+
-                        "\nPhone Number: " + restaurantList.get(0).displayPhone() + "\nRating: " + restaurantList.get(0).rating());
-            }
-        });
+        textView = (TextView)findViewById(R.id.textView);
+        b1.setVisibility(View.INVISIBLE);
+        b2.setVisibility(View.VISIBLE);
+        if(restaurantList != null && restaurantList.get(0) != null) {
+            textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone()  + "\nRating: " + restaurantList.get(0).rating());
+        } else {
+            Toast.makeText(this, "Retrieving Yelp information...", Toast.LENGTH_SHORT).show();
+        }
     }
 
     protected void locationRequestDenied() {
