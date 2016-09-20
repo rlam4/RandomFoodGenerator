@@ -53,21 +53,9 @@ public class YelpHelperZipCode extends AsyncTask<String, Void, ArrayList<Busines
 
     @Override
     protected void onPostExecute(ArrayList<Business> result) {
+        /*
         Business firstRestaurant = shuffle(result).get(0);
         Log.i(MainActivity.TAG, "Retrieved restaurant: " + firstRestaurant.name() + " " + firstRestaurant.location().address() + " " + firstRestaurant.displayPhone());
-    }
-
-    private ArrayList<Business> shuffle(ArrayList<Business> places) {
-        int j = 0;
-        Business temp = null;
-
-        // Randomly swaps one index with another
-        for (int i = 0; i < places.size(); i++) {
-            j = ThreadLocalRandom.current().nextInt(0, i + 1);
-            temp = places.get(j);
-            places.set(j, places.get(i));
-            places.set(i, temp);
-        }
-        return places;
+        */
     }
 }

@@ -30,6 +30,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -51,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public ImageView img;
 
     public static ArrayList<Business> restaurantList;
+    public static ArrayList<Business> workingList;
+
     public TextView textView;
 
 
@@ -71,16 +74,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View v) {
                 //pop off list
-                if(restaurantList != null && restaurantList.get(0) != null) {
-                    restaurantList.remove(0);
-                    textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone()  + "\nRating: " + restaurantList.get(0).rating());
-                    new DownloadImageHelper(img).execute(restaurantList.get(0).imageUrl());
+                if(workingList != null && workingList.get(0) != null) {
+                    Log.i(TAG, "Retrieving next restaurant");
+                    workingList.remove(0);
+                    textView.setText("Name: " + workingList.get(0).name() + "\nAddress: " + workingList.get(0).location().address().get(0)+ "\nPhone Number: " + workingList.get(0).displayPhone()  + "\nRating: " + workingList.get(0).rating());
+                    new DownloadImageHelper(img).execute(workingList.get(0).imageUrl());
+                    if(workingList.size() == 1) {
+                        Log.i(TAG, "Reached end of list, reshuffling");
+                        workingList = new ArrayList<>(shuffle(restaurantList));
+                    }
                 }
+
             }
         });
-
-
-
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -140,10 +146,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         textView = (TextView)findViewById(R.id.textView);
         b1.setVisibility(View.INVISIBLE);
         b2.setVisibility(View.VISIBLE);
-        if(restaurantList != null && restaurantList.get(0) != null) {
-            textView.setText("Name: " + restaurantList.get(0).name() + "\nAddress: " + restaurantList.get(0).location().address().get(0)+ "\nPhone Number: " + restaurantList.get(0).displayPhone()  + "\nRating: " + restaurantList.get(0).rating());
+        workingList = new ArrayList<>(shuffle(restaurantList));
+        if(workingList != null && workingList.get(0) != null) {
+            textView.setText("Name: " + workingList.get(0).name() + "\nAddress: " + workingList.get(0).location().address().get(0)+ "\nPhone Number: " + workingList.get(0).displayPhone()  + "\nRating: " + workingList.get(0).rating());
             img.setVisibility(View.VISIBLE);
-            new DownloadImageHelper(img).execute(restaurantList.get(0).imageUrl());
+            new DownloadImageHelper(img).execute(workingList.get(0).imageUrl());
         } else {
             Toast.makeText(this, "Retrieving Yelp information...", Toast.LENGTH_SHORT).show();
         }
@@ -251,5 +258,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public void setRestaurantList(ArrayList<Business> list){
         this.restaurantList = list;
+    }
+
+    private ArrayList<Business> shuffle(ArrayList<Business> places) {
+        int j = 0;
+        Business temp = null;
+
+        // Randomly swaps one index with another
+        for (int i = 0; i < places.size(); i++) {
+            j = ThreadLocalRandom.current().nextInt(0, i + 1);
+            temp = places.get(j);
+            places.set(j, places.get(i));
+            places.set(i, temp);
+        }
+        return places;
     }
 }
