@@ -21,7 +21,7 @@ public class DownloadImageHelper extends AsyncTask<String, Void, Bitmap> {
 
     @Override
     protected Bitmap doInBackground(String... params) {
-        String imgURL = params[0].replace("ms.jpg", "o.jpg");
+        String imgURL = params[0].replace("ms.jpg", "ls.jpg");// ls is 250, o is original
 
         Bitmap bm = null;
         try {
